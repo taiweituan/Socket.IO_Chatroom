@@ -2,7 +2,7 @@
 /* global jQuery */
 /* global moment */
 
-var name = getQueryVariable('name');
+var name = getQueryVariable('name') || 'Anonymous';
 var room = getQueryVariable('room');
 var socket = io();
 

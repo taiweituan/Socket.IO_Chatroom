@@ -13,7 +13,7 @@ socket.on('connect',function(){
 
 });
 
-// when 'message' socket is fired
+// when 'message' socket is fired 
 socket.on('message', function(message){
     // var now = moment();
     // var timestamp = now.valueOf();

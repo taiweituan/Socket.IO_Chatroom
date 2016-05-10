@@ -1,17 +1,30 @@
+/* global io */
+/* global jQuery */
+/* global moment */
+
+var name = getQueryVariable('name');
+var room = getQueryVariable('room');
 var socket = io();
+
 socket.on('connect',function(){
     console.log('connected to socket.io server');
+    var queryVars = getQueryVariable('name');
+    jQuery('.messages').append('<p>' + queryVars + ' has joined.</p>');
+
 });
 
 // when 'message' socket is fired
 socket.on('message', function(message){
     // var now = moment();
     // var timestamp = now.valueOf();
-    var timestampMoment = moment.utc(message.timestamp).format('h:mm:ss a'); // display time in h:mm:ss am/pm format
     
-    console.log('new message ' + message.text);
+    // display time in h:mm:ss am/pm format
+    var timestampMoment = moment.utc(message.timestamp).format('h:mm:ss a'); 
+    var $message = jQuery('.messages');
     
-    jQuery('.messages').append('<p>' + '<b> ' + timestampMoment + ': </b>' + message.text + '</p>')
+    console.log('new message '  + message.text);
+    $message.append('<p><b>' + message.name + ' ' + timestampMoment +': </b></p>');
+    $message.append('<p>'+ message.text + '</p>');
 });
 
 //handle  submitting of new message
@@ -22,8 +35,22 @@ $form.on('submit', function(event){
     
     var $message = $form.find('input[name=message]');
     socket.emit('message', {
+        name: name,
         text: $message.val()
     });
     
     $message.val('');
 });
+
+
+function getQueryVariable(variable){
+    var query = window.location.search.substring(1);
+    var vars = query.split('&');
+    for(var i = 0; i < vars.length; i++){
+        var pair = vars[i].split('=');
+        if(decodeURIComponent(pair[0]) == variable){
+            return decodeURIComponent(pair[1]);
+        }
+        return undefined;
+    }
+}

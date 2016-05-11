@@ -8,10 +8,17 @@ var socket = io();
 
 jQuery('.room-Title').text(room);
 
+// client connect to chatroom successfully
 socket.on('connect',function(){
     console.log('connected to socket.io server');
     var queryVars = getQueryVariable('name');
     jQuery('.messages').append('<p>' + queryVars + ' has joined.</p>');
+    
+    // send signal to server along with client info and room name
+    socket.emit('joinRoom', {
+        name: name,
+        room: room
+    });
 
 });
 

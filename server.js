@@ -11,11 +11,29 @@ var clientInfo = {};
 
 // upon connecting to the chat room
 io.on('connection', function(socket){
-    console.log('User connected via socket.io!');
+    console.log('An user has connected via socket.io!');
+    
+    // send message whe a client disconnect from chatroom
+    socket.on('disconnect', function(req) {
+        var userData = clientInfo[socket.id];
+
+        if (typeof userData !== 'undefined'){
+            socket.leave(userData.room);
+            io.to(userData.room).emit('message', {
+                name: 'SYSTEM',
+                text: '[' + userData.name + '] has left the chatroom!',
+                timestamp: moment().valueOf()
+            });
+            
+            // delete client info 
+            delete clientInfo[socket.id];
+            console.log('[' + userData.name + '] has left the chatroom!');
+        }
+    });
     
     // upon joining the chat room
     socket.on('joinRoom', function(req) {
-        console.log('User "' + req.name + '" has joined the room "' + req.room + '"!');
+        console.log('User [' + req.name + '] has joined the room [' + req.room + ']!');
         clientInfo[socket.id] = req;
         
         // to join a specific room
@@ -24,14 +42,14 @@ io.on('connection', function(socket){
         // broadcast to everyone except client that client has joined the chat room
         // broadcast message only to the room the client is entering to
         socket.broadcast.to(req.room).emit('message',{
-            name: 'System',
-            text: req.name + 'has joined!',
+            name: 'SYSTEM',
+            text: '[' + req.name + '] has joined!',
             timestamp: moment().valueOf()
         });
     });
     
     socket.on('message',function(message){
-        console.log('message received: '+ message.text);
+        console.log('User ['+clientInfo[socket.id].name+  '] said: "'+ message.text +'"');
         
         // send message to everybody except sender himself
         // socket.broadcast.emit('message', message);
@@ -42,7 +60,7 @@ io.on('connection', function(socket){
     });
     
     socket.emit('message', {
-        name: 'System',
+        name: 'SYSTEM',
         text: 'Welcome to the chat app',
         timestamp: moment().valueOf()
     });

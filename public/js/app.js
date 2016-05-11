@@ -32,8 +32,8 @@ socket.on('message', function(message){
     var $message = jQuery('.messages');
     
     console.log('new message '  + message.text);
-    $message.append('<p><b>' + message.name + ' ' + timestampMoment +': </b></p>');
-    $message.append('<p>'+ message.text + '</p>');
+    $message.append('<p><b>' + message.name + ' ' + timestampMoment +': </b><br>'+
+                    message.text + '</p>');
 });
 
 //handle  submitting of new message

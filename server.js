@@ -9,6 +9,8 @@ app.use(express.static(__dirname + '/public'));
 
 var clientInfo = {};
 
+
+
 // upon connecting to the chat room
 io.on('connection', function(socket){
     console.log('An user has connected via socket.io!');
@@ -51,12 +53,17 @@ io.on('connection', function(socket){
     socket.on('message',function(message){
         console.log('User ['+clientInfo[socket.id].name+  '] said: "'+ message.text +'"');
         
+        if (message.text === '@currentUsers'){
+            sendCurrentUsers(socket);
+        } else{
+            // send message to everybody include sender himself
+            message.timestamp = moment().valueOf();
+            io.to(clientInfo[socket.id].room).emit('message', message);
+        }
+        
         // send message to everybody except sender himself
         // socket.broadcast.emit('message', message);
         
-        // send message to everybody include sender himself
-        message.timestamp = moment().valueOf();
-        io.to(clientInfo[socket.id].room).emit('message', message);
     });
     
     socket.emit('message', {
@@ -69,3 +76,29 @@ io.on('connection', function(socket){
 http.listen(PORT, function() {
     console.log('server listening to port: ' + PORT);
 });
+
+
+
+// send current user to provided socket
+function sendCurrentUsers(socket) {
+    var info = clientInfo[socket.id];
+    var users = [];
+    
+    if(typeof info === 'undefined'){
+        return;
+    }
+    
+    Object.keys(clientInfo).forEach(function(socketId){
+        var userInfo = clientInfo[socketId];
+        
+        if(info.room === userInfo.room){
+            users.push(userInfo.name);
+        }
+    });
+    
+    socket.emit('message',{
+        name:'SYSTEM',
+        text:'Current users: ' + users.join(', '),
+        timestamp: moment.valueOf()
+    });
+}

@@ -29,11 +29,14 @@ socket.on('message', function(message){
     
     // display time in h:mm:ss am/pm format
     var timestampMoment = moment.utc(message.timestamp).format('h:mm:ss a'); 
-    var $message = jQuery('.messages');
+    var $messages = jQuery('.messages');
+    var $message = jQuery('<li class="list-group-item"></li>');
     
     console.log('new message '  + message.text);
     $message.append('<p><b>' + message.name + ' ' + timestampMoment +': </b><br>'+
                     message.text + '</p>');
+                    
+    $messages.append($message);
 });
 
 //handle  submitting of new message
